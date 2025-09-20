@@ -1,0 +1,21 @@
+name: Docker Image CI
+
+# Ativa o workflow em eventos de push e pull request na branch 'main'
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    # Define o ambiente para o job, neste caso, a última versão do Ubuntu
+    runs-on: ubuntu-latest
+
+    steps:
+      # Passo 1: Faz o checkout do código do seu repositório
+      - uses: actions/checkout@v2
+
+      # Passo 2: Faz o build da imagem Docker. O ponto '.' significa o Dockerfile na pasta raiz
+      - name: Build the Docker image
+        run: docker build . --file Dockerfile --tag meu-site-docker:$(date +%s)
