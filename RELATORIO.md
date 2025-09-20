@@ -1,8 +1,8 @@
 # Relatório de Build da Imagem Docker
 
 - **Status do Build:** success
-- **Data e Hora:** 2025-09-20 19:34:41 UTC
-- **Link da Execução:** https://github.com/marieliburi/marieli-docker/actions/runs/17884008072
+- **Data e Hora:** 2025-09-20 16:38:22 -03
+- **Link da Execução:** https://github.com/marieliburi/marieli-docker/actions/runs/17884045328
 
 ---
 
@@ -39,7 +39,7 @@
 
 #8 exporting to image
 #8 exporting layers done
-#8 writing image sha256:d7aefd224176bac094e07f8f8b32abfc76747e770c8b7a0a8e72bd6d5bf314b6 done
+#8 writing image sha256:9d08f29c1213f7d75e0fd7d57ef0a0042727b94a7f3ac3cd0ff0670441a14950 done
 #8 naming to docker.io/library/marieli-docker:latest done
 #8 DONE 0.0s
 ```
