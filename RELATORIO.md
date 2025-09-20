@@ -1,8 +1,8 @@
 # Relatório de Build da Imagem Docker
 
 - **Status do Build:** success
-- **Data e Hora:** 2025-09-20 16:38:22 -03
-- **Link da Execução:** https://github.com/marieliburi/marieli-docker/actions/runs/17884045328
+- **Data e Hora:** 2025-09-20 17:16:27 -03
+- **Link da Execução:** https://github.com/marieliburi/marieli-docker/actions/runs/17884367945
 
 ---
 
@@ -28,7 +28,7 @@
 #4 DONE 0.0s
 
 #5 [internal] load build context
-#5 transferring context: 3.24kB done
+#5 transferring context: 3.37kB done
 #5 DONE 0.0s
 
 #6 [2/3] RUN rm -rf /usr/share/nginx/html/*
@@ -39,7 +39,7 @@
 
 #8 exporting to image
 #8 exporting layers done
-#8 writing image sha256:9d08f29c1213f7d75e0fd7d57ef0a0042727b94a7f3ac3cd0ff0670441a14950 done
+#8 writing image sha256:0935050265e065bb8fa886e4e27823de08b5be971fac919b442b7c6c6c3d8bd8 done
 #8 naming to docker.io/library/marieli-docker:latest done
 #8 DONE 0.0s
 ```
