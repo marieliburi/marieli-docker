@@ -1,0 +1,8 @@
+version: '3.8'
+
+services:
+  site-web:
+    build: .
+    container_name: marieli-site
+    ports:
+      - "8080:80"
