@@ -1,4 +1,4 @@
-name: Docker Image CI
+name: Docker Image CI com Relatório Automático
 
 # Ativa o workflow em eventos de push e pull request na branch 'main'
 on:
@@ -8,14 +8,53 @@ on:
     branches: [ main ]
 
 jobs:
-  build:
-    # Define o ambiente para o job, neste caso, a última versão do Ubuntu
+  build_and_report:
     runs-on: ubuntu-latest
-
+    permissions:
+      contents: write # Permite que o workflow comite arquivos
+    
     steps:
       # Passo 1: Faz o checkout do código do seu repositório
-      - uses: actions/checkout@v2
+      - name: Checkout Code
+        uses: actions/checkout@v2
 
-      # Passo 2: Faz o build da imagem Docker. O ponto '.' significa o Dockerfile na pasta raiz
+      # Passo 2: Faz o build da imagem Docker
       - name: Build the Docker image
-        run: docker build . --file Dockerfile --tag meu-site-docker:$(date +%s)
+        id: docker_build # ID para referenciar este passo
+        run: docker build . --file Dockerfile --tag marieli-docker:latest
+
+      # Passo 3: Cria o conteúdo do relatório
+      - name: Generate Report Content
+        id: report_content
+        run: |
+          BUILD_STATUS="${{ steps.docker_build.outcome }}"
+          WORKFLOW_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          REPORT_CONTENT=$(cat <<EOF
+          # Relatório de Build da Imagem Docker
+
+          - **Status do Build:** $BUILD_STATUS
+          - **Data e Hora:** $(date -u +"%Y-%m-%d %H:%M:%S UTC")
+          - **Link da Execução:** $WORKFLOW_URL
+
+          ---
+
+          ## Logs da Execução
+          <details>
+            <summary>Clique para ver os logs completos</summary>
+
+          \`\`\`
+          $(docker build . --file Dockerfile --tag marieli-docker:latest 2>&1)
+          \`\`\`
+          </details>
+          EOF
+          )
+          echo "$REPORT_CONTENT" > RELATORIO.md
+
+      # Passo 4: Comita o relatório atualizado
+      - name: Commit Report
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: "Relatório de build automático"
+          branch: main
+          # Faz o commit apenas se houverem alterações no arquivo RELATORIO.md
+          file_pattern: 'RELATORIO.md'
