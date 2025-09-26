@@ -10,66 +10,54 @@ jobs:
   build_and_report:
     runs-on: ubuntu-latest
     permissions:
-      contents: write # necessário para commitar e publicar
+      contents: write
 
     env:
       TZ: 'America/Sao_Paulo'
 
     steps:
-      # Passo 1: Checkout do código
       - name: Checkout Code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v2
 
-      # Passo 2: Build da imagem Docker
       - name: Build the Docker image
         id: docker_build
         run: docker build . --file Dockerfile --tag marieli-docker:latest
 
-      # Passo 3: Gera relatório em HTML
-      - name: Generate Report HTML
-        id: report_html
+      - name: Generate HTML Report
         run: |
-          BUILD_STATUS="✅ Sucesso"
-          if [ "${{ job.status }}" != "success" ]; then
-            BUILD_STATUS="❌ Falhou"
-          fi
-
+          BUILD_STATUS="${{ steps.docker_build.outcome }}"
           WORKFLOW_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-
-          cat > RELATORIO.html <<EOF
-          <!DOCTYPE html>
+          echo '<!DOCTYPE html>
           <html lang="pt-BR">
           <head>
             <meta charset="UTF-8">
-            <title>Relatório de Build Docker</title>
+            <title>Relatório de Build da Imagem Docker</title>
             <style>
-              body { font-family: Arial, sans-serif; margin: 40px; background: #111; color: #eee; }
-              h1 { color: #fff; }
-              .status { font-size: 1.2rem; margin-bottom: 10px; }
-              .ok { color: #4caf50; }
-              .fail { color: #f44336; }
-              pre { background: #222; padding: 15px; border-radius: 5px; overflow-x: auto; }
-              a { color: #00bfff; }
+              body { font-family: Arial, sans-serif; background: #111; color: #fff; padding: 20px; }
+              h1 { color: #00ffcc; }
+              pre { background: #222; padding: 10px; border-radius: 5px; color: #0f0; }
+              a { color: #00ccff; }
+              details { background: #1a1a1a; padding: 10px; border-radius: 5px; }
             </style>
           </head>
           <body>
             <h1>Relatório de Build da Imagem Docker</h1>
-            <p class="status">Status do Build: <span class="${BUILD_STATUS == '✅ Sucesso' && 'ok' || 'fail'}">$BUILD_STATUS</span></p>
-            <p><strong>Data e Hora:</strong> $(date +"%Y-%m-%d %H:%M:%S %Z")</p>
-            <p><strong>Link da Execução:</strong> <a href="$WORKFLOW_URL" target="_blank">Ver no GitHub Actions</a></p>
-
+            <p><b>Status do Build:</b> '"$BUILD_STATUS"'</p>
+            <p><b>Data e Hora:</b> '"$(date +"%Y-%m-%d %H:%M:%S %Z")"'</p>
+            <p><b>Link da Execução:</b> <a href="'"$WORKFLOW_URL"'" target="_blank">Ver no GitHub Actions</a></p>
+            <hr>
             <h2>Logs da Execução</h2>
-            <pre>
-$(docker build . --file Dockerfile --tag marieli-docker:latest 2>&1)
-            </pre>
+            <details>
+              <summary>Clique para expandir os logs</summary>
+              <pre>'"$(docker build . --file Dockerfile --tag marieli-docker:latest 2>&1)"'</pre>
+            </details>
           </body>
-          </html>
-          EOF
+          </html>' > RELATORIO.html
 
-      # Passo 4: Publica no GitHub Pages
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: .   # publica a raiz (onde está o RELATORIO.html)
-          keep_files: true # mantém outros arquivos se houver
+          publish_dir: .
+          publish_branch: gh-pages
+          force_orphan: true
