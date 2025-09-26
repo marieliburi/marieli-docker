@@ -1,5 +1,6 @@
 name: Docker Image CI com Relatório Automático
 
+# Ativa o workflow em eventos de push e pull request na branch 'main'
 on:
   push:
     branches: [ main ]
@@ -10,13 +11,14 @@ jobs:
   build_and_report:
     runs-on: ubuntu-latest
     permissions:
-      contents: write
+      contents: write # Permite que o workflow comite arquivos
     
-    # Define o fuso horário correto para a execução (São Paulo)
+    # Adicione esta linha para definir o fuso horário do Brasil
     env:
       TZ: 'America/Sao_Paulo'
       
     steps:
+      # Passo 1: Faz o checkout do código do seu repositório
       - name: Checkout Code
         uses: actions/checkout@v2
 
@@ -25,61 +27,37 @@ jobs:
         id: docker_build
         run: docker build . --file Dockerfile --tag marieli-docker:latest
 
-      # Passo 3: Cria o conteúdo do relatório em HTML
-      - name: Generate HTML Report Content
+      # Passo 3: Cria o conteúdo do relatório
+      - name: Generate Report Content
         id: report_content
         run: |
           BUILD_STATUS="${{ steps.docker_build.outcome }}"
-          STATUS_CLASS=$(if [ "$BUILD_STATUS" = "success" ]; then echo "sucesso"; else echo "erro"; fi)
           WORKFLOW_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-          LOG_CONTENT=$(docker build . --file Dockerfile --tag marieli-docker:latest 2>&1)
-          
-          # Conteúdo HTML gerado
-          REPORT_HTML=$(cat <<EOF
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-  <meta charset="UTF-8">
-  <title>Relatório do Build Automático – GitHub Actions</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <style>
-    body {font-family: Arial, sans-serif; background: #f7faff; color: #222; margin:0; padding:40px;}
-    .relatorio {background: #fff; border-radius: 14px; box-shadow: 0 2px 16px rgba(208, 228, 251, 0.25); max-width: 650px; margin: 0 auto; padding: 32px;}
-    h2 {color: #0b57d0;}
-    h3 {color: #3762bc;}
-    pre {background: #ecf4fb; color: #153530; padding: 14px 12px; border-radius: 7px; overflow-x:auto; white-space: pre-wrap; word-wrap: break-word;}
-    .status {font-size:1.09em;}
-    .tentativas {margin-top:18px;}
-    .erro {color: #b52e23;}
-    .sucesso {color: #218c4b;}
-  </style>
-</head>
-<body>
-  <div class="relatorio">
-    <h2>Relatório do Build Automático (GitHub Actions)</h2>
-    <p class="status"><b>Status:</b> <span class="${STATUS_CLASS}">${BUILD_STATUS}</span></p>
-    <p><b>Data/Hora:</b> $(date +"%Y-%m-%d %H:%M:%S %Z")</p>
-    <p><b>Link da Execução:</b> <a href="${WORKFLOW_URL}">Ver no GitHub Actions</a></p>
-    
-    <h3>Log Principal:</h3>
-    <pre>
-${LOG_CONTENT}
-    </pre>
-    
-    <h3>Histórico/Tentativas:</h3>
-    <p>Como o relatório é gerado automaticamente a cada push, o histórico de tentativas pode ser acessado no link acima, na aba "Actions".</p>
-    
-  </div>
-</body>
-</html>
-EOF
+          REPORT_CONTENT=$(cat <<EOF
+          # Relatório de Build da Imagem Docker
+
+          - **Status do Build:** $BUILD_STATUS
+          - **Data e Hora:** $(date +"%Y-%m-%d %H:%M:%S %Z")
+          - **Link da Execução:** $WORKFLOW_URL
+
+          ---
+
+          ## Logs da Execução
+          <details>
+            <summary>Clique para ver os logs completos</summary>
+
+          \`\`\`
+          $(docker build . --file Dockerfile --tag marieli-docker:latest 2>&1)
+          \`\`\`
+          </details>
+          EOF
           )
-          echo "$REPORT_HTML" > relatorio-actions.html
+          echo "$REPORT_CONTENT" > RELATORIO.md
 
       # Passo 4: Comita o relatório atualizado
       - name: Commit Report
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
-          commit_message: "Atualiza relatorio-actions.html"
+          commit_message: "Relatório de build automático"
           branch: main
-          file_pattern: 'relatorio-actions.html'
+          file_pattern: 'RELATORIO.md'
