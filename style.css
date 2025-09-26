@@ -1,0 +1,141 @@
+/* Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: "Poppins", "Helvetica Neue", Arial, sans-serif;
+    background-color: #000; /* preto dominante */
+    color: #f5f5f5; /* branco suave */
+    line-height: 1.8;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+/* Cabeçalho fixo elegante */
+header {
+    background-color: #000;
+    border-bottom: 1px solid #222;
+    padding: 1.2rem 3rem;
+    text-align: center;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+header h1 {
+    font-size: 2rem;
+    font-weight: 600;
+    letter-spacing: 1px;
+    margin-bottom: 0.8rem;
+    color: #fff;
+}
+
+/* Navegação */
+nav ul {
+    list-style: none;
+    display: flex;
+    justify-content: center;
+    gap: 2.5rem;
+}
+
+nav a {
+    text-decoration: none;
+    color: #f5f5f5;
+    font-weight: 500;
+    font-size: 1rem;
+    padding: 0.3rem 0;
+    position: relative;
+    transition: color 0.3s ease;
+}
+
+nav a::after {
+    content: "";
+    position: absolute;
+    width: 0;
+    height: 2px;
+    left: 0;
+    bottom: -3px;
+    background: #fff;
+    transition: width 0.3s ease;
+}
+
+nav a:hover::after,
+nav a.ativo::after {
+    width: 100%;
+}
+
+nav a:hover {
+    color: #ccc;
+}
+
+/* Conteúdo principal */
+main {
+    flex: 1;
+    padding: 4rem 2rem;
+    max-width: 900px;
+    margin: auto;
+    text-align: justify;
+}
+
+main h2 {
+    font-size: 1.6rem;
+    margin-bottom: 1rem;
+    color: #fff;
+    border-left: 4px solid #fff;
+    padding-left: 0.8rem;
+    margin-top: 2rem;
+}
+
+/* Texto */
+p {
+    margin-bottom: 1rem;
+    font-size: 1.05rem;
+    color: #e0e0e0;
+}
+
+/* Listas */
+ul {
+    margin: 1rem 0 1.5rem 1.5rem;
+}
+
+li {
+    margin-bottom: 0.7rem;
+}
+
+/* Blocos de código */
+pre {
+    background-color: #111;
+    color: #0f0;
+    padding: 1.2rem;
+    border-radius: 8px;
+    margin: 1.5rem 0;
+    overflow-x: auto;
+    font-size: 0.95rem;
+    box-shadow: 0 0 10px rgba(255,255,255,0.05);
+}
+
+/* Rodapé */
+footer {
+    background-color: #000;
+    border-top: 1px solid #222;
+    text-align: center;
+    padding: 1.5rem;
+    font-size: 0.9rem;
+    color: #999;
+}
+
+/* Links dentro do texto */
+main a {
+    color: #fff;
+    font-weight: bold;
+    text-decoration: underline;
+    transition: color 0.3s;
+}
+
+main a:hover {
+    color: #ccc;
+}
