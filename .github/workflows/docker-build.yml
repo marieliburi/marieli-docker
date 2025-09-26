@@ -1,6 +1,5 @@
 name: Docker Image CI com Relatório Automático
 
-# Ativa o workflow em eventos de push e pull request na branch 'main'
 on:
   push:
     branches: [ main ]
@@ -11,53 +10,66 @@ jobs:
   build_and_report:
     runs-on: ubuntu-latest
     permissions:
-      contents: write # Permite que o workflow comite arquivos
-    
-    # Adicione esta linha para definir o fuso horário do Brasil
+      contents: write # necessário para commitar e publicar
+
     env:
       TZ: 'America/Sao_Paulo'
-      
-    steps:
-      # Passo 1: Faz o checkout do código do seu repositório
-      - name: Checkout Code
-        uses: actions/checkout@v2
 
-      # Passo 2: Faz o build da imagem Docker
+    steps:
+      # Passo 1: Checkout do código
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      # Passo 2: Build da imagem Docker
       - name: Build the Docker image
         id: docker_build
         run: docker build . --file Dockerfile --tag marieli-docker:latest
 
-      # Passo 3: Cria o conteúdo do relatório
-      - name: Generate Report Content
-        id: report_content
+      # Passo 3: Gera relatório em HTML
+      - name: Generate Report HTML
+        id: report_html
         run: |
-          BUILD_STATUS="${{ steps.docker_build.outcome }}"
+          BUILD_STATUS="✅ Sucesso"
+          if [ "${{ job.status }}" != "success" ]; then
+            BUILD_STATUS="❌ Falhou"
+          fi
+
           WORKFLOW_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-          REPORT_CONTENT=$(cat <<EOF
-          # Relatório de Build da Imagem Docker
 
-          - **Status do Build:** $BUILD_STATUS
-          - **Data e Hora:** $(date +"%Y-%m-%d %H:%M:%S %Z")
-          - **Link da Execução:** $WORKFLOW_URL
+          cat > RELATORIO.html <<EOF
+          <!DOCTYPE html>
+          <html lang="pt-BR">
+          <head>
+            <meta charset="UTF-8">
+            <title>Relatório de Build Docker</title>
+            <style>
+              body { font-family: Arial, sans-serif; margin: 40px; background: #111; color: #eee; }
+              h1 { color: #fff; }
+              .status { font-size: 1.2rem; margin-bottom: 10px; }
+              .ok { color: #4caf50; }
+              .fail { color: #f44336; }
+              pre { background: #222; padding: 15px; border-radius: 5px; overflow-x: auto; }
+              a { color: #00bfff; }
+            </style>
+          </head>
+          <body>
+            <h1>Relatório de Build da Imagem Docker</h1>
+            <p class="status">Status do Build: <span class="${BUILD_STATUS == '✅ Sucesso' && 'ok' || 'fail'}">$BUILD_STATUS</span></p>
+            <p><strong>Data e Hora:</strong> $(date +"%Y-%m-%d %H:%M:%S %Z")</p>
+            <p><strong>Link da Execução:</strong> <a href="$WORKFLOW_URL" target="_blank">Ver no GitHub Actions</a></p>
 
-          ---
-
-          ## Logs da Execução
-          <details>
-            <summary>Clique para ver os logs completos</summary>
-
-          \`\`\`
-          $(docker build . --file Dockerfile --tag marieli-docker:latest 2>&1)
-          \`\`\`
-          </details>
+            <h2>Logs da Execução</h2>
+            <pre>
+$(docker build . --file Dockerfile --tag marieli-docker:latest 2>&1)
+            </pre>
+          </body>
+          </html>
           EOF
-          )
-          echo "$REPORT_CONTENT" > RELATORIO.md
 
-      # Passo 4: Comita o relatório atualizado
-      - name: Commit Report
-        uses: stefanzweifel/git-auto-commit-action@v4
+      # Passo 4: Publica no GitHub Pages
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
         with:
-          commit_message: "Relatório de build automático"
-          branch: main
-          file_pattern: 'RELATORIO.md'
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: .   # publica a raiz (onde está o RELATORIO.html)
+          keep_files: true # mantém outros arquivos se houver
