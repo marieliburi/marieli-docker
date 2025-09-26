@@ -12,6 +12,7 @@ jobs:
     permissions:
       contents: write
     
+    # Define o fuso horário correto para a execução (São Paulo)
     env:
       TZ: 'America/Sao_Paulo'
       
@@ -19,7 +20,7 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v2
 
-      # Passo 2: Faz o build da imagem Docker e armazena o status
+      # Passo 2: Faz o build da imagem Docker
       - name: Build the Docker image
         id: docker_build
         run: docker build . --file Dockerfile --tag marieli-docker:latest
@@ -73,7 +74,7 @@ ${LOG_CONTENT}
 </html>
 EOF
           )
-          echo "$REPORT_HTML" > relatorio-actions.html # Cria o arquivo HTML
+          echo "$REPORT_HTML" > relatorio-actions.html
 
       # Passo 4: Comita o relatório atualizado
       - name: Commit Report
